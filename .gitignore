@@ -1,2 +1,5 @@
 **/.DS_Store
 obj/
+/nbproject/private/
+/build/
+/dist/

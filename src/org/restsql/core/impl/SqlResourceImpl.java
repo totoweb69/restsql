@@ -339,8 +339,14 @@ public class SqlResourceImpl implements SqlResource {
 						+ sqlStruct.getStatement());
 			}
 			request.getLogger().addSql(sqlStruct.getStatement());
+                        int idx=0;
+                        for(int i=0; i< sqlStruct.getPlaceHolderValues().size(); i++ ){
+                            idx++;
+                            	statement.setObject(idx, sqlStruct.getPlaceHolderValues().get(i));
+                        }
 			for (int i = 0; i < sqlStruct.getPreparedValues().size(); i++) {
-				statement.setObject(i + 1, sqlStruct.getPreparedValues().get(i));
+                            idx++;
+                            statement.setObject(idx, sqlStruct.getPreparedValues().get(i));
 			}
 			final ResultSet resultSet = statement.executeQuery();
 			if (metaData.isHierarchical()) {

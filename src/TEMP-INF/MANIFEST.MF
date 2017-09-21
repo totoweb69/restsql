@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.6
+Created-By: 1.8.0_66-b17 (Oracle Corporation)
+Built-By: mamrani
+Specification-Vendor: restsql.org
+Specification-Title: restSQL HTTP API and service implementation
+Specification-Version: 0.8.12
+Implementation-Vendor: restsql.org
+Implementation-Title: restSQL HTTP API and service implementation
+Implementation-Version: 0.8.12
+Dependencies: com.sun.xml.bind services export

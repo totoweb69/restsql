@@ -207,6 +207,25 @@ public class ColumnMetaDataImpl implements ColumnMetaData {
 		return charOrDateTimeType;
 	}
 
+        
+	@Override
+	public boolean isDateTimeType() {
+		boolean dateTimeType = false;
+		switch (columnType) {
+			case Types.TIME:
+			case Types.TIMESTAMP:
+			case Types.DATE:			
+				dateTimeType = true;
+				break;
+
+			default:
+				// do nothing
+		}
+		return dateTimeType;
+	}        
+        
+        
+        
 	@Override
 	public boolean isNonqueriedForeignKey() {
 		return nonqueriedForeignKey;

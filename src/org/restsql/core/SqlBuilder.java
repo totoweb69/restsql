@@ -29,12 +29,14 @@ public interface SqlBuilder {
 		private final StringBuilder clause, main, preparedClause, preparedStatement, statement;
 		private StringBuilder preparedMain;
 		private final List<Object> preparedValues;
+                private final List<Object> placeHolderValues;
 
 		public SqlStruct(final int mainSize, final int clauseSize) {
 			main = new StringBuilder(mainSize);
 			clause = new StringBuilder(clauseSize);
 			preparedClause = new StringBuilder(clauseSize);
-			preparedValues = new ArrayList<Object>(clauseSize);
+			preparedValues = new ArrayList<>(clauseSize);
+                        placeHolderValues = new ArrayList<>(clauseSize);
 			statement = new StringBuilder(mainSize + clauseSize);
 			preparedStatement = new StringBuilder(mainSize + clauseSize);
 		}
@@ -88,6 +90,10 @@ public interface SqlBuilder {
 		public List<Object> getPreparedValues() {
 			return preparedValues;
 		}
+
+                public List<Object> getPlaceHolderValues() {
+                    return placeHolderValues;
+                }
 
 		public String getStatement() {
 			return statement.toString();

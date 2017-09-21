@@ -56,6 +56,7 @@ public class SqlResourceFactoryImpl implements SqlResourceFactory {
 						resName, definition, sqlBuilder), sqlBuilder, new ArrayList<Trigger>());
 				sqlResources.put(resName, sqlResource);
 			} catch (final JAXBException exception) {
+				exception.printStackTrace();
 				throw new SqlResourceFactoryException("Error unmarshalling SQL Resource "
 						+ getSqlResourceFileName(resName) + " -- " + exception.getMessage());
 			} finally {

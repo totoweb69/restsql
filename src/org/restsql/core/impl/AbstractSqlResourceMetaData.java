@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.apache.commons.lang.StringUtils;
 
 import org.restsql.core.ColumnMetaData;
 import org.restsql.core.Config;
@@ -36,6 +38,7 @@ import org.restsql.core.SqlResourceMetaData;
 import org.restsql.core.TableMetaData;
 import org.restsql.core.TableMetaData.TableRole;
 import org.restsql.core.sqlresource.Documentation;
+import org.restsql.core.sqlresource.PlaceHolder;
 import org.restsql.core.sqlresource.SqlResourceDefinition;
 import org.restsql.core.sqlresource.SqlResourceDefinitionUtils;
 import org.restsql.core.sqlresource.Table;
@@ -135,6 +138,10 @@ public abstract class AbstractSqlResourceMetaData implements SqlResourceMetaData
 	/** Map<database.table, TableMetaData> */
 	@XmlTransient
 	private Map<String, TableMetaData> tableMap;
+        
+        @XmlTransient
+        protected Map<String,PlaceHolder> placeHolders = new HashMap<>();
+        
 
 	@XmlElementWrapper(name = "tables", required = true)
 	@XmlElement(name = "table", type = TableMetaDataImpl.class, required = true)
@@ -202,6 +209,18 @@ public abstract class AbstractSqlResourceMetaData implements SqlResourceMetaData
 		return tables;
 	}
 
+        @Override
+        public  Map<String, PlaceHolder> getPlaceHolders() {
+            if(placeHolders != null){
+                return Collections.unmodifiableMap(placeHolders);
+            }else{
+                return Collections.emptyMap();
+            }
+        }
+
+        
+        
+        
 	/**
 	 * Determines the tables to use for write, possibly substituting the parent+, child+ or join table for query tables.
 	 */
@@ -247,12 +266,27 @@ public abstract class AbstractSqlResourceMetaData implements SqlResourceMetaData
 		SqlResourceDefinitionUtils.validate(definition);
 		try {
 			connection = Factory.getConnection(SqlResourceDefinitionUtils.getDefaultDatabase(definition));
-			final Statement statement = connection.createStatement();
-			sql = getSqlMainQuery(definition, sqlBuilder);
+			sql = getSqlMainQuery(definition, sqlBuilder) ;
 			if (Config.logger.isDebugEnabled()) {
 				Config.logger.debug("Loading meta data for " + this.resName + " - " + sql);
 			}
-			final ResultSet resultSet = statement.executeQuery(sql);
+                        final PreparedStatement statement = connection.prepareStatement(sql);
+                        
+                        
+                        //Gestion des placeHolder
+                        if(!definition.getMetadata().getPlaceHolder().isEmpty()){
+                            for(PlaceHolder ph : definition.getMetadata().getPlaceHolder()){
+                                placeHolders.put(ph.getName().toUpperCase(), ph);
+                            }
+                        }
+                        int nbParams = StringUtils.countMatches(sql, "?");
+                        for(int idx=1; idx<=nbParams; idx++){
+                            statement.setObject(idx, null);
+                        }
+                        
+                        
+                        
+			final ResultSet resultSet = statement.executeQuery();
 			resultSet.next();
 			buildTablesAndColumns(resultSet, connection);
 			resultSet.close();
@@ -396,7 +430,7 @@ public abstract class AbstractSqlResourceMetaData implements SqlResourceMetaData
 	protected String getSqlMainQuery(final SqlResourceDefinition definition, final SqlBuilder sqlBuilder)
 			throws InvalidRequestException {
 		final Request request = Factory.getRequest(Type.SELECT, resName, null, null, null, null);
-		request.setSelectLimit(new Integer(1));
+		request.setSelectLimit(new Integer(0));
 		request.setSelectOffset(new Integer(0));
 		return sqlBuilder.buildSelectSql(this, definition.getQuery().getValue(), request).getStatement();
 	}

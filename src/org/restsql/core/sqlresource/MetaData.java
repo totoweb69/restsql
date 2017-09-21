@@ -39,7 +39,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MetaData", propOrder = {
     "database",
-    "table"
+    "table",
+    "placeHolder"
 })
 public class MetaData {
 
@@ -47,6 +48,8 @@ public class MetaData {
     protected Database database;
     @XmlElement(required = true)
     protected List<Table> table;
+    @XmlElement(name = "placeHolder")
+    protected List<PlaceHolder> placeHolder;
 
     /**
      * Gets the value of the database property.
@@ -96,9 +99,21 @@ public class MetaData {
      */
     public List<Table> getTable() {
         if (table == null) {
-            table = new ArrayList<Table>();
+            table = new ArrayList<>();
         }
         return this.table;
     }
 
+    public List<PlaceHolder> getPlaceHolder() {
+        if(placeHolder == null){
+            placeHolder = new ArrayList<>();
+        }
+        return placeHolder;
+    }
+
+    
+    
+    
+    
+    
 }

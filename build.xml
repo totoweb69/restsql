@@ -86,6 +86,7 @@
 				<attribute name="Implementation-Vendor" value="${manifest.vendor}" />
 				<attribute name="Implementation-Title" value="${manifest.title.war}" />
 				<attribute name="Implementation-Version" value="${build.version}" />
+				<attribute name="Dependencies" value="com.sun.xml.bind services" />
 			</manifest>
 		</jar>
 	</target>

@@ -2,9 +2,11 @@
 package org.restsql.core.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 
 import org.restsql.core.ColumnMetaData;
 import org.restsql.core.InvalidRequestException;
@@ -15,6 +17,7 @@ import org.restsql.core.RequestValue.Operator;
 import org.restsql.core.SqlBuilder;
 import org.restsql.core.SqlResourceMetaData;
 import org.restsql.core.TableMetaData;
+import org.restsql.core.sqlresource.PlaceHolder;
 
 /**
  * Builds SQL for an operation on a SQL Resource.
@@ -114,7 +117,7 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 		}
 	}
 
-	private void appendValue(final StringBuilder part, final StringBuilder preparedPart,
+	protected void appendValue(final StringBuilder part, final StringBuilder preparedPart,
 			final List<Object> preparedValues, final Object value, final boolean charOrDateTimeType,
 			ColumnMetaData column) {
 		if (value != null && charOrDateTimeType) {
@@ -252,18 +255,45 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 			}
 		}
 
-		if (sqls.size() == 0) {
+		if (sqls.isEmpty()) {
 			throw new InvalidRequestException(InvalidRequestException.MESSAGE_INVALID_PARAMS);
 		}
 		return sqls;
 	}
 
+        
+        protected boolean existingWhere(StringBuilder mainRequest){
+            boolean retour = false;
+            try {
+                String upperRequest = mainRequest.toString().toUpperCase();
+                int idx = upperRequest.lastIndexOf("WHERE");
+                if(idx > 0){
+                    String str = upperRequest.substring(0, idx);
+                    int nbParen =StringUtils.countMatches(str, "(");
+                    retour = (nbParen % 2) == 0;
+                }
+            } catch (Exception e) {
+                retour = false;
+            }
+            return retour;
+        }
+        
+        
+        
 	private void buildSelectSql(final SqlResourceMetaData metaData, final List<RequestValue> params,
 			final SqlStruct sql) throws InvalidRequestException {
 		if (params != null && params.size() > 0) {
 			boolean validParamFound = false;
+                        Map<String,RequestValue> placeHolderValues = new HashMap<>();
 			for (final RequestValue param : params) {
-				if (sql.getMain().indexOf("where ") > 0 || sql.getMain().indexOf("WHERE ") > 0
+                                //Traitement des placeHolder
+                                if(metaData.getPlaceHolders().containsKey(param.getName().toUpperCase())){
+                                    placeHolderValues.put(param.getName().toUpperCase(), param);
+                                    continue;
+                                }
+                            
+			
+                                if(existingWhere(sql.getMain()) 
 						|| sql.getClause().length() != 0) {
 					sql.appendToBothClauses(" AND ");
 				} else {
@@ -288,6 +318,12 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 			if (sql.getClause().length() > 0 && !validParamFound) {
 				throw new InvalidRequestException(InvalidRequestException.MESSAGE_INVALID_PARAMS);
 			}
+                        
+                        
+                        //Ajout des valeurs des places Holder
+                        setPlaceHolderValues( placeHolderValues, metaData.getPlaceHolders(), sql);
+                        
+                        
 		}
 	}
 
@@ -465,4 +501,33 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 					param.getValue(), column.isCharOrDateTimeType(), column);
 		}
 	}
+
+    private void setPlaceHolderValues(Map<String, RequestValue> placeHolderValues, Map<String, PlaceHolder> placeHolders, SqlStruct sql) throws InvalidRequestException {
+        try {
+            if(placeHolderValues.isEmpty()){
+                return;
+            }
+            
+            if(placeHolders.isEmpty()){
+                return;
+            }
+            
+            List<PlaceHolder> holders = new ArrayList<>();
+            holders.addAll(placeHolders.values());
+            Collections.sort(holders, (p1,p2) -> p1.getIndex().compareTo(p2.getIndex()));
+            for(PlaceHolder p : holders){
+                if(placeHolderValues.containsKey(p.getName().toUpperCase())){
+                    Object val = p.getObjectValue(placeHolderValues.get(p.getName().toUpperCase()).getValue().toString());
+                    sql.getPlaceHolderValues().add(val);
+                }else{
+                    sql.getPlaceHolderValues().add(null);
+                }
+            }
+            
+        } catch (Exception e) {
+            throw new InvalidRequestException(InvalidRequestException.MESSAGE_INVALID_PARAMS);
+        }
+    }
+
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.restsql.core.Request.Type;
+import org.restsql.core.sqlresource.PlaceHolder;
 import org.restsql.core.sqlresource.SqlResourceDefinition;
 
 /**
@@ -14,6 +15,8 @@ import org.restsql.core.sqlresource.SqlResourceDefinition;
  */
 public interface SqlResourceMetaData {
 
+        public Map<String,PlaceHolder> getPlaceHolders();
+    
 	public List<ColumnMetaData> getAllReadColumns();
 
 	public TableMetaData getChild();
