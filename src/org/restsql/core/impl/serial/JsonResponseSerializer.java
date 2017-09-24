@@ -3,9 +3,12 @@ package org.restsql.core.impl.serial;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.restsql.core.ColumnMetaData;
 import org.restsql.core.ResponseSerializer;
@@ -105,7 +108,13 @@ public class JsonResponseSerializer implements ResponseSerializer {
 			if (value instanceof Number || value instanceof Boolean) {
 				string.append(value);
 			} else {
-				string.append(JsonUtil.quote(value.toString()));
+                                if(value instanceof java.sql.Date || value instanceof java.sql.Timestamp){
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                                    sdf.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));                                    
+                                    string.append(JsonUtil.quote(sdf.format(value))); 
+                                }else{
+                                    string.append(JsonUtil.quote(value.toString()));
+                                }
 			}
 		}
 	}
