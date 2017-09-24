@@ -4,6 +4,8 @@
 	<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask" classpath="lib/jaxb-xjc.jar" />
 
 	<target name="dist" depends="compile,lib,doc,lib-doc" description="generates distribution files" />
+        
+        <target name="dist2" depends="compile,lib" description="generates distribution files" />
 
 	<target name="clean" description="deletes output dir">
 		<delete dir="obj" failonerror="false" includeEmptyDirs="true" quiet="true" />

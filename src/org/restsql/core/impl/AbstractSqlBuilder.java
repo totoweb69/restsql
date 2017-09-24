@@ -504,14 +504,11 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 
     private void setPlaceHolderValues(Map<String, RequestValue> placeHolderValues, Map<String, PlaceHolder> placeHolders, SqlStruct sql) throws InvalidRequestException {
         try {
-            if(placeHolderValues.isEmpty()){
-                return;
-            }
             
             if(placeHolders.isEmpty()){
                 return;
             }
-            
+
             List<PlaceHolder> holders = new ArrayList<>();
             holders.addAll(placeHolders.values());
             Collections.sort(holders, (p1,p2) -> p1.getIndex().compareTo(p2.getIndex()));
@@ -523,6 +520,9 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
                     sql.getPlaceHolderValues().add(null);
                 }
             }
+            
+
+            
             
         } catch (Exception e) {
             throw new InvalidRequestException(InvalidRequestException.MESSAGE_INVALID_PARAMS);

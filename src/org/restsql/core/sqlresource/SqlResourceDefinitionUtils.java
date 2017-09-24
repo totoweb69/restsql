@@ -2,7 +2,10 @@
 package org.restsql.core.sqlresource;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 
 import org.restsql.core.ColumnMetaData;
 import org.restsql.core.SqlResourceException;
@@ -16,12 +19,17 @@ import org.restsql.core.TableMetaData.TableRole;
  */
 public class SqlResourceDefinitionUtils {
 
-	/** Returns default database. */
+	/** Returns default database.
+        * @param definition
+        * @return  */
 	public static String getDefaultDatabase(final SqlResourceDefinition definition) {
 		return definition.getMetadata().getDatabase().getDefault();
 	}
 
-	/** Returns table object for column, ignoring case. Uses qualified name first, then unqualified. */
+	/** Returns table object for column, ignoring case. Uses qualified name first, then unqualified.
+        * @param definition
+        * @param column
+        * @return  */
 	public static Table getTable(final SqlResourceDefinition definition, final ColumnMetaData column) {
 		Table target = null;
 		for (final Table table : definition.getMetadata().getTable()) {
@@ -104,6 +112,20 @@ public class SqlResourceDefinitionUtils {
 			throw new SqlResourceException("Definition requires one table element with role Child");
 		} else if (getTableList(definition, TableRole.Join).size() > 1) {
 			throw new SqlResourceException("Definition requires one table element with role Join");
-		}
+		} else {
+                    int nbParam = StringUtils.countMatches(definition.getQuery().value,"?");
+                    Set<Integer> indexes = new HashSet<>();
+                    for(PlaceHolder holder : definition.getMetadata().getPlaceHolder()){
+                        if(holder.getIndex() > nbParam){
+                            throw new SqlResourceException(String.format( "Index error for placeHolder <%s> : found <%d> expected <%d>,<%d>",
+                                                                          holder.getName(),holder.getIndex(),1,nbParam));
+                        }
+                        indexes.add(holder.getIndex());
+                    }
+                    if(definition.getMetadata().getPlaceHolder().size() != nbParam){
+                        throw new SqlResourceException(String.format( "wrong number of placeholder's definitions <%d> found / <%d> expected",
+                                                                      definition.getMetadata().getPlaceHolder().size(),nbParam));
+                    }                    
+                }
 	}
 }

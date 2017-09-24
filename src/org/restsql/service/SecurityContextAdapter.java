@@ -4,6 +4,7 @@ package org.restsql.service;
 import java.security.Principal;
 
 import org.restsql.security.SecurityContext;
+import org.restsql.security.SqlResourceRolePrivileges;
 
 
 /**
@@ -12,17 +13,22 @@ import org.restsql.security.SecurityContext;
  * @author Mark Sawers
  */
 public class SecurityContextAdapter implements SecurityContext {
-	private javax.ws.rs.core.SecurityContext jaxRsContext;
+	private final javax.ws.rs.core.SecurityContext jaxRsContext;
 
 	public SecurityContextAdapter(javax.ws.rs.core.SecurityContext jaxRsContext) {
 		this.jaxRsContext = jaxRsContext;
 	}
 	
+        @Override
 	public Principal getUserPrincipal() {
 		return jaxRsContext.getUserPrincipal();
 	}
 
+        @Override
 	public boolean isUserInRole(String roleName) {
+                if(SqlResourceRolePrivileges.TOKEN_WILDCARD.equals(roleName)){
+                    return true;
+                }
 		return jaxRsContext.isUserInRole(roleName);
 	}
 }

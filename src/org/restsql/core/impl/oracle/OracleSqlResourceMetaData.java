@@ -34,7 +34,7 @@ public class OracleSqlResourceMetaData extends AbstractSqlResourceMetaData {
 	@Override
 	protected String getColumnName(final SqlResourceDefinition definition,
 			final ResultSetMetaData resultSetMetaData, final int colNumber) throws SQLException {
-		return ((ResultSetMetaData) resultSetMetaData).getColumnName(colNumber);
+		return  resultSetMetaData.getColumnName(colNumber);
 	}
 
 	/**

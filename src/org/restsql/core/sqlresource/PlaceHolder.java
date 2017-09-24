@@ -12,7 +12,7 @@ public class PlaceHolder {
     @XmlAttribute(name = "name", required = true)
     protected String  name;
     
-    @XmlAttribute(name = "idx", required = true)
+    @XmlAttribute(name = "index" , required = true)
     protected Integer index;
     
     @XmlAttribute(name = "type", required = true)
