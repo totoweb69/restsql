@@ -51,9 +51,10 @@ import javax.xml.bind.annotation.XmlType;
     "documentation"
 })
 public class SqlResourceDefinition {
-
+        
     @XmlElement(required = true)
     protected Query query;
+        
     @XmlElement(required = true)
     protected MetaData metadata;
     protected List<ValidatedAttribute> validatedAttribute;
@@ -129,6 +130,7 @@ public class SqlResourceDefinition {
      * {@link ValidatedAttribute }
      * 
      * 
+     * @return 
      */
     public List<ValidatedAttribute> getValidatedAttribute() {
         if (validatedAttribute == null) {

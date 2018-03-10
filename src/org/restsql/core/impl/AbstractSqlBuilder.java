@@ -520,10 +520,7 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
                     sql.getPlaceHolderValues().add(null);
                 }
             }
-            
 
-            
-            
         } catch (Exception e) {
             throw new InvalidRequestException(InvalidRequestException.MESSAGE_INVALID_PARAMS);
         }
