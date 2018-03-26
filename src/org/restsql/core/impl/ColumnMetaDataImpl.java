@@ -1,6 +1,7 @@
 /* Copyright (c) restSQL Project Contributors. Licensed under MIT. */
 package org.restsql.core.impl;
 
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -271,6 +272,13 @@ public class ColumnMetaDataImpl implements ColumnMetaData {
 						break;
 
 					case Types.NUMERIC:
+                                                try{
+                                                    value = new BigInteger((String) value);
+                                                }catch(NumberFormatException e){
+                                                    value = Float.valueOf((String) value); 
+                                                }
+                                                break;
+                                                
 					case Types.DECIMAL:
 					case Types.FLOAT:
 					case Types.REAL:
