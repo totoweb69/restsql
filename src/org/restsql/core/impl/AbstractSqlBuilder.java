@@ -46,8 +46,9 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 		// Handle limit and offset
 		if (request.getSelectLimit() != null) {
 			// Call concrete database-specific class to get the limit clause
-			sql.appendToBothClauses(buildSelectLimitSql(request.getSelectLimit().intValue(), request
-					.getSelectOffset().intValue()));
+                        String limit = buildSelectLimitSql(request.getSelectLimit().intValue(), request.getSelectOffset().intValue());
+                        sql.appendToLimit(limit);
+			//sql.appendToBothClauses(buildSelectLimitSql(request.getSelectLimit().intValue(), request.getSelectOffset().intValue()));
 		}
 
 		sql.compileStatements();

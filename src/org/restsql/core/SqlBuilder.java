@@ -4,6 +4,7 @@ package org.restsql.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Builds SQL for an operation on a SQL Resource.
@@ -26,7 +27,7 @@ public interface SqlBuilder {
 	 * @author Mark Sawers
 	 */
 	public static class SqlStruct {
-		private final StringBuilder clause, main, preparedClause, preparedStatement, statement;
+		private final StringBuilder clause, main, preparedClause, preparedStatement, statement, limit;
 		private StringBuilder preparedMain;
 		private final List<Object> preparedValues;
                 private final List<Object> placeHolderValues;
@@ -39,6 +40,7 @@ public interface SqlBuilder {
                         placeHolderValues = new ArrayList<>(clauseSize);
 			statement = new StringBuilder(mainSize + clauseSize);
 			preparedStatement = new StringBuilder(mainSize + clauseSize);
+                        limit = new StringBuilder(clauseSize);
 		}
 
 		public SqlStruct(final int mainSize, final int clauseSize, final boolean usePreparedMain) {
@@ -56,15 +58,44 @@ public interface SqlBuilder {
 			preparedMain.append(string);
 		}
 
+                public void appendToLimit(final String string) {
+                    if(StringUtils.isNotEmpty(string)){
+                        limit.append(string);
+                    }
+                }
+                
+                
+                
 		/**
 		 * Appends clause to the main for the complete statement, and prepared clause to the main for the complete
 		 * prepared statement.
 		 */
 		public void compileStatements() {
-			statement.append(main);
-			statement.append(clause);
-			preparedStatement.append(preparedMain == null ? main : preparedMain);
-			preparedStatement.append(preparedClause);
+                    
+                        String mainPart1 = main.toString();
+                        String mainPart2 = "";
+                        
+                        // On va gérer le cas où on a un order by dans la requête
+                        
+                        int idx1 = StringUtils.lastIndexOf(mainPart1,')');
+                        if(idx1 < 0 ){
+                            idx1 = 0;
+                        }
+                        int idx2 = StringUtils.indexOf(mainPart1.toUpperCase(), "ORDER BY", idx1);
+                        if(idx2 > 0){
+                            mainPart2 = mainPart1.substring(idx2);
+                            mainPart1 = mainPart1.substring(0,idx2);
+                        }
+                        
+			statement.append(mainPart1).append(" ");
+			statement.append(clause).append(" ");
+                        statement.append(mainPart2).append(" ");
+                        statement.append(limit);
+                        
+			preparedStatement.append(preparedMain == null ? mainPart1 : preparedMain).append(" ");
+			preparedStatement.append(preparedClause).append(" ");
+                        preparedStatement.append(preparedMain == null ? mainPart2 : "").append(" ");
+                        preparedStatement.append(limit);
 		}
 
 		public StringBuilder getClause() {
@@ -102,6 +133,12 @@ public interface SqlBuilder {
 		public boolean isClauseEmpty() {
 			return clause.length() == 0;
 		}
+
+                public StringBuilder getLimit() {
+                    return limit;
+                }
+                
+                
 	}
 
 }
