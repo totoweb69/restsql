@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-
 import org.restsql.core.ColumnMetaData;
 import org.restsql.core.InvalidRequestException;
 import org.restsql.core.Request;
@@ -270,8 +269,9 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
                 int idx = upperRequest.lastIndexOf("WHERE");
                 if(idx > 0){
                     String str = upperRequest.substring(0, idx);
-                    int nbParen =StringUtils.countMatches(str, "(");
-                    retour = (nbParen % 2) == 0;
+                    int nbParenLeft =StringUtils.countMatches(str, "(");
+                    int nbParenRight =StringUtils.countMatches(str, ")");
+                    retour = (nbParenLeft == nbParenRight);
                 }
             } catch (Exception e) {
                 retour = false;
